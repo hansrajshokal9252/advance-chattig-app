@@ -29,6 +29,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.hansraj.phonelogin.Adapters.MessagesAdapter;
 import com.hansraj.phonelogin.Models.Message;
+import com.hansraj.phonelogin.R;
 import com.hansraj.phonelogin.databinding.ActivityChatBinding;
 
 import java.util.ArrayList;
@@ -57,13 +58,25 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        getSupportActionBar().hide();
+        //getSupportActionBar().hide();
 
         database = FirebaseDatabase.getInstance();
         storage = FirebaseStorage.getInstance();
 
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Uploading image...");
+        dialog.setCancelable(false);
+
         messages = new ArrayList<>();
         adapter = new MessagesAdapter(this, messages,senderRoom,receiverRoom);
+
+        /*LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
+        binding.recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.scrollToPosition(0);*/
+
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.setAdapter(adapter);
 
@@ -140,10 +153,95 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        binding.attachment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent, 25);
+            }
+        });
+
+
+        //getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setTitle(name);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 25) {
+            if(data != null) {
+                if(data.getData() != null) {
+                    Uri selectedImage = data.getData();
+                    Calendar calendar = Calendar.getInstance();
+                    StorageReference reference = storage.getReference().child("chats").child(calendar.getTimeInMillis() + "");
+                    dialog.show();
+                    reference.putFile(selectedImage).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            dialog.dismiss();
+                            if(task.isSuccessful()) {
+                                reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        String filePath = uri.toString();
+
+                                        String messageTxt = binding.messageBox.getText().toString();
+
+                                        Date date = new Date();
+                                        Message message = new Message(messageTxt, senderUid, date.getTime());
+                                        message.setMessage("photo");
+                                        message.setImageUrl(filePath);
+                                        binding.messageBox.setText("");
+
+                                        String randomKey = database.getReference().push().getKey();
+
+                                        HashMap<String, Object> lastMsgObj = new HashMap<>();
+                                        lastMsgObj.put("lastMsg", message.getMessage());
+                                        lastMsgObj.put("lastMsgTime", date.getTime());
+
+                                        database.getReference().child("chats").child(senderRoom).updateChildren(lastMsgObj);
+                                        database.getReference().child("chats").child(receiverRoom).updateChildren(lastMsgObj);
+
+                                        database.getReference().child("chats")
+                                                .child(senderRoom)
+                                                .child("messages")
+                                                .child(randomKey)
+                                                .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                database.getReference().child("chats")
+                                                        .child(receiverRoom)
+                                                        .child("messages")
+                                                        .child(randomKey)
+                                                        .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+
+                                                    }
+                                                });
+                                            }
+                                        });
+
+                                        //Toast.makeText(ChatActivity.this, filePath, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.chat_menu,menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
