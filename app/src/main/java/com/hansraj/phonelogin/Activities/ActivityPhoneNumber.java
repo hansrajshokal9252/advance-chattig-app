@@ -8,18 +8,29 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.hansraj.phonelogin.R;
 
 public class ActivityPhoneNumber extends AppCompatActivity {
     EditText pnumber;
     Button continuebutton;
     String phoneNumber;
+    FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phone_number);
         getSupportActionBar().hide();
+
+        auth = FirebaseAuth.getInstance();
+
+        if(auth.getCurrentUser() != null) {
+            Intent intent = new Intent(ActivityPhoneNumber.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
         pnumber=findViewById(R.id.phoneBox);
         continuebutton=findViewById(R.id.continueBtn);
         continuebutton.setOnClickListener(new View.OnClickListener() {
