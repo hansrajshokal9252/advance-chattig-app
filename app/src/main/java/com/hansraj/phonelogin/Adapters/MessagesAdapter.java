@@ -71,6 +71,8 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
 
 
+
+
         if(holder.getClass() == SentViewHolder.class) {
             SentViewHolder viewHolder = (SentViewHolder)holder;
 
@@ -85,24 +87,12 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
             viewHolder.binding.message.setText(message.getMessage());
 
-            /*if(message.getFeeling() >= 0) {
-                viewHolder.binding.feeling.setImageResource(reactions[message.getFeeling()]);
-                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.binding.feeling.setVisibility(View.GONE);
-            }*/
+
+
+
 
 
             /*
-
-            viewHolder.binding.image.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    popup.onTouch(v, event);
-                    return false;
-                }
-            });
-
             viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -170,26 +160,13 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             }
             viewHolder.binding.message.setText(message.getMessage());
 
-            /*if(message.getFeeling() >= 0) {
-                //message.setFeeling(reactions[message.getFeeling()]);
-                viewHolder.binding.feeling.setImageResource(reactions[message.getFeeling()]);
-                viewHolder.binding.feeling.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.binding.feeling.setVisibility(View.GONE);
-            }*/
+
+
+
 
 
 
             /*
-
-            viewHolder.binding.image.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    popup.onTouch(v, event);
-                    return false;
-                }
-            });
-
             viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {

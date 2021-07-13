@@ -58,6 +58,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setSupportActionBar(binding.toolbar);
         //getSupportActionBar().hide();
 
         database = FirebaseDatabase.getInstance();
@@ -81,6 +82,19 @@ public class ChatActivity extends AppCompatActivity {
         binding.recyclerView.setAdapter(adapter);
 
         String name = getIntent().getStringExtra("name");
+        String profile=getIntent().getStringExtra("image");
+
+        binding.name.setText(name);
+        Glide.with(ChatActivity.this).load(profile)
+                .placeholder(R.drawable.defaultprofile)
+                .into(binding.profile);
+        binding.imageView2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         receiverUid = getIntent().getStringExtra("uid");
         senderUid = FirebaseAuth.getInstance().getUid();
 
@@ -164,9 +178,9 @@ public class ChatActivity extends AppCompatActivity {
         });
 
 
-        //getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setTitle(name);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        //getSupportActionBar().setTitle(name);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
